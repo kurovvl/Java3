@@ -8,20 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InMemoryAuthService implements AuthService {
-    private List<User> users;
-
-    public InMemoryAuthService() {
-//        this.users = Arrays.asList();
-        this.users = new ArrayList<>(
-//                List.of() java 9+
-                Arrays.asList(
-                        new User("log1", "pass", "nick1"),
-                        new User("log2", "pass", "nick2"),
-                        new User("log3", "pass", "nick3"),
-                        new User("log4", "pass", "nick4")
-                )
-        );
-    }
 
     @Override
     public void start() {
@@ -35,12 +21,9 @@ public class InMemoryAuthService implements AuthService {
 
     @Override
     public String getNicknameByLoginAndPassword(String login, String password) {
-        for (User user : users) {
-            if (login.equals(user.getLogin())) {
-                if (password.equals(user.getPassword())) return user.getNickname();
-                else throw new WrongCredentialsException("");
-            }
-        }
+        User user = new User().getUser(login, password);
+        if (user.isUserInitialized()) return user.getNick();
+
         throw new UserNotFoundException("User not found");
     }
 

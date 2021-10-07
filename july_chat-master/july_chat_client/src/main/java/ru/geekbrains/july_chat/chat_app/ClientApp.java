@@ -22,5 +22,6 @@ public class ClientApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("July chat");
         primaryStage.show();
+
     }
 }

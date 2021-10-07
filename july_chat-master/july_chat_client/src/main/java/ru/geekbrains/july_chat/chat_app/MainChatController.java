@@ -11,10 +11,13 @@ import javafx.scene.layout.VBox;
 import ru.geekbrains.july_chat.chat_app.net.ChatMessageService;
 import ru.geekbrains.july_chat.chat_app.net.MessageProcessor;
 
+import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Date;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 public class MainChatController implements Initializable, MessageProcessor {
     public VBox loginPanel;
@@ -27,6 +30,8 @@ public class MainChatController implements Initializable, MessageProcessor {
     public ListView<String> contactList;
     public TextField inputField;
     public Button btnSendMessage;
+    private static String historyFile = "history.txt";
+    private static int lastHistoryLines = 100;
 
 
     public void mockAction(ActionEvent actionEvent) {
@@ -67,8 +72,13 @@ public class MainChatController implements Initializable, MessageProcessor {
             ObservableList<String> list = FXCollections.observableArrayList(message.substring(8).split("\\s"));
             contactList.setItems(list);
         } else {
-            mainChatArea.appendText(message + System.lineSeparator());
+            appendText(message);
+            writeHistory(message);
         }
+    }
+
+    private void appendText(String text) {
+        mainChatArea.appendText(text + System.lineSeparator());
     }
 
     private void showError(String message) {
@@ -80,11 +90,37 @@ public class MainChatController implements Initializable, MessageProcessor {
 
     }
 
+    private void writeHistory(String message) {
+        try {
+            FileWriter f = new FileWriter(historyFile, true);
+            f.write(new Date() + ": " + message.replace(System.lineSeparator(), "") + System.lineSeparator());
+            f.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    private void readHistory() {
+        try {
+            Path path = Path.of(historyFile);
+            Stream<String> lines = Files.lines(path);
+            String[] data = lines.toArray(size -> new String[size]);
+            lines.close();
+            int startPos = data.length >= lastHistoryLines ? data.length - lastHistoryLines : 0;
+            for (int i = startPos; i < data.length; i++) {
+                appendText(data[i]);
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 //        List<String> contacts = Arrays.asList("Vasya", "Petya", "Masha", "Kolya", "Sergey");
 //        ObservableList<String> list = FXCollections.observableArrayList("Vasya", "Petya", "Masha", "Kolya", "Sergey");
 //        contactList.setItems(list);
         this.chatMessageService = new ChatMessageService(this);
+        readHistory();
     }
 }
