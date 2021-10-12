@@ -12,7 +12,7 @@ public class ChatClientHandler {
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
-    private Thread handlerThread;
+    //private Thread handlerThread;
     private JulyChatServer server;
     private String currentUser;
 
@@ -29,7 +29,7 @@ public class ChatClientHandler {
     }
 
     public void handle() {
-        handlerThread = new Thread(() -> {
+        server.getUsersExecutorService().execute(() -> {
             authorize();
             try {
                 while (!Thread.currentThread().isInterrupted() && socket.isConnected()) {
@@ -43,7 +43,7 @@ public class ChatClientHandler {
                 server.removeAuthorizedClientFromList(this);
             }
         });
-        handlerThread.start();
+        //handlerThread.start();
     }
 
     //auth: lllll ppppp
@@ -70,9 +70,9 @@ public class ChatClientHandler {
         }
     }
 
-    public Thread getHandlerThread() {
-        return handlerThread;
-    }
+    //public Thread getHandlerThread() {
+    //    return handlerThread;
+    //}
 
     public String getCurrentUser() {
         return currentUser;

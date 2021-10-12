@@ -8,15 +8,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class JulyChatServer {
     private static final int PORT = 8089;
     private AuthService authService;
     private List<ChatClientHandler> handlers;
+    private ExecutorService usersExecutorService;
 
     public JulyChatServer() {
         this.authService = new InMemoryAuthService();
         this.handlers = new ArrayList<>();
+        usersExecutorService = Executors.newCachedThreadPool();
     }
 
     public void start() {
@@ -58,5 +62,8 @@ public class JulyChatServer {
             sb.append(handler.getCurrentUser()).append(" ");
         }
         broadcastMessage(sb.toString());
+    }
+    public ExecutorService getUsersExecutorService() {
+        return usersExecutorService;
     }
 }
